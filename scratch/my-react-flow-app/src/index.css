@@ -1,0 +1,53 @@
+/* General flow background */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: sans-serif;
+}
+
+.react-flow__node-textUpdater {
+  width: 300px;
+  max-width: 300px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  overflow: hidden;
+}
+
+.react-flow__node-textUpdater .chat-history {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #333;
+  background: #f7f7f7;
+}
+
+.react-flow__node-textUpdater .chat-message {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  word-wrap: break-word;
+}
+
+.react-flow__node-textUpdater .chat-input {
+  resize: none;
+  border: none;
+  border-top: 1px solid #ddd;
+  padding: 8px;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  min-height: 36px;
+  max-height: 100px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
