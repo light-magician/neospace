@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 
-import './index.css';
-
-function TextUpdaterNode({ data, isConnectable }) {
+function TextUpdaterNode({ data, isConnectable, selected }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const textareaRef = useRef(null);
@@ -29,15 +27,55 @@ function TextUpdaterNode({ data, isConnectable }) {
     }
   }, [input, messages]);
 
-  return (
-    <div className='react-flow__node-textUpdater'>
-      <Handle
-        type='target'
-        position={Position.Top}
-        isConnectable={isConnectable}
-      />
+  const stopFlowInteraction = (e) => {
+    e.stopPropagation();
+  };
 
-      <div className='chat-history' ref={containerRef}>
+  return (
+    <div
+      className='react-flow__node-textUpdater'
+      onMouseEnter={stopFlowInteraction}
+      onMouseMove={stopFlowInteraction}
+    >
+      {/* Only show handles if node is selected */}
+      {selected && (
+        <>
+          <Handle
+            type='source'
+            position={Position.Top}
+            id='top'
+            className='blue-handle'
+            isConnectable={isConnectable}
+          />
+          <Handle
+            type='source'
+            position={Position.Right}
+            id='right'
+            className='blue-handle'
+            isConnectable={isConnectable}
+          />
+          <Handle
+            type='source'
+            position={Position.Bottom}
+            id='bottom'
+            className='blue-handle'
+            isConnectable={isConnectable}
+          />
+          <Handle
+            type='source'
+            position={Position.Left}
+            id='left'
+            className='blue-handle'
+            isConnectable={isConnectable}
+          />
+        </>
+      )}
+
+      <div
+        className='chat-history nodrag'
+        ref={containerRef}
+        onMouseDown={stopFlowInteraction}
+      >
         {messages.map((msg, idx) => (
           <div key={idx} className='chat-message'>
             {msg.content}
@@ -47,17 +85,12 @@ function TextUpdaterNode({ data, isConnectable }) {
 
       <textarea
         ref={textareaRef}
-        className='chat-input'
+        className='chat-input nodrag'
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder='Message...'
-      />
-
-      <Handle
-        type='source'
-        position={Position.Bottom}
-        isConnectable={isConnectable}
+        onMouseDown={stopFlowInteraction}
       />
     </div>
   );

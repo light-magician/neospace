@@ -1,16 +1,14 @@
-/* General flow background */
 html,
 body,
 #root {
+  height: 100%;
   margin: 0;
   padding: 0;
-  height: 100%;
-  font-family: sans-serif;
 }
 
 .react-flow__node-textUpdater {
-  width: 300px;
-  max-width: 300px;
+  width: 500px;
+  max-width: 500px;
   height: 400px;
   display: flex;
   flex-direction: column;
@@ -27,6 +25,7 @@ body,
   font-size: 14px;
   color: #333;
   background: #f7f7f7;
+  cursor: text;
 }
 
 .react-flow__node-textUpdater .chat-message {
@@ -50,4 +49,16 @@ body,
   max-height: 100px;
   overflow-y: auto;
   box-sizing: border-box;
+  cursor: text;
+}
+
+/* Blue circular connection handles */
+.blue-handle {
+  width: 10px;
+  height: 10px;
+  background-color: #3b82f6; /* Tailwind blue-500 */
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: crosshair;
+  z-index: 10;
 }
