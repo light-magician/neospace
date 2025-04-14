@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Konva Sticky Note with Arrow Dots</title>
+  <script src="https://cdn.jsdelivr.net/npm/konva@8.4.3/konva.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    textarea {
+      font-size: 18px;
+      font-family: Calibri, sans-serif;
+      position: absolute;
+      border: none;
+      padding: 10px;
+      overflow: hidden;
+      resize: none;
+      box-shadow: 0px 0px 5px #999;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script>
+    // Setup stage and layer
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const stage = new Konva.Stage({
+      container: "container",
+      width: width,
+      height: height,
+      draggable: true, // allows panning the entire stage
+    });
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    // Create a Group for our custom sticky note node
+    const nodeGroup = new Konva.Group({
+      x: 100,
+      y: 100,
+      draggable: true,
+    });
+    layer.add(nodeGroup);
+
+    // Background rectangle for the note
+    const rect = new Konva.Rect({
+      width: 200,
+      height: 100,
+      fill: "yellow",
+      stroke: "black",
+      strokeWidth: 2,
+      cornerRadius: 5,
+    });
+    nodeGroup.add(rect);
+
+    // Text element for the note
+    const text = new Konva.Text({
+      text: "Double-click to edit",
+      fontSize: 18,
+      fontFamily: "Calibri",
+      fill: "black",
+      padding: 10,
+      width: 200,
+      height: 100,
+      align: "center",
+      verticalAlign: "middle",
+    });
+    nodeGroup.add(text);
+
+    // Function to show an HTML textarea overlay for editing text
+    function showTextarea() {
+      // Position the textarea over the text element.
+      const textPosition = text.getAbsolutePosition();
+      const stageBox = stage.container().getBoundingClientRect();
+
+      const areaPosition = {
+        x: stageBox.left + textPosition.x,
+        y: stageBox.top + textPosition.y,
+      };
+
+      // Create textarea and style it to overlay on the canvas.
+      const textarea = document.createElement("textarea");
+      document.body.appendChild(textarea);
+      textarea.value = text.text();
+      textarea.style.top = areaPosition.y + "px";
+      textarea.style.left = areaPosition.x + "px";
+      textarea.style.width = rect.width() + "px";
+      textarea.style.height = rect.height() + "px";
+      textarea.focus();
+
+      // When the user presses Enter, update the text element.
+      textarea.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          text.text(textarea.value);
+          layer.draw();
+          document.body.removeChild(textarea);
+        }
+      });
+    }
+
+    // Double-click text element to edit it.
+    text.on("dblclick", function () {
+      showTextarea();
+    });
+
+    // Create arrow dots that are initially hidden.
+    // These appear on the top, right, bottom, and left edges of the note.
+    const arrowDots = [];
+    const dotPositions = [
+      {name: "top", x: rect.width() / 2, y: 0},
+      {name: "right", x: rect.width(), y: rect.height() / 2},
+      {name: "bottom", x: rect.width() / 2, y: rect.height()},
+      {name: "left", x: 0, y: rect.height() / 2},
+    ];
+
+    dotPositions.forEach((pos) => {
+      const dot = new Konva.Circle({
+        x: pos.x,
+        y: pos.y,
+        radius: 6,
+        fill: "blue",
+        stroke: "black",
+        strokeWidth: 1,
+        visible: false,
+        draggable: true,
+      });
+      // Mark the dot with its side name (for potential directional logic)
+      dot.dotName = pos.name;
+      nodeGroup.add(dot);
+      arrowDots.push(dot);
+
+      // When dragging starts, create a temporary arrow that starts at the dot.
+      dot.on("dragstart", function () {
+        const arrow = new Konva.Arrow({
+          points: [
+            nodeGroup.x() + pos.x,
+            nodeGroup.y() + pos.y,
+            nodeGroup.x() + pos.x,
+            nodeGroup.y() + pos.y,
+          ],
+          pointerLength: 10,
+          pointerWidth: 10,
+          fill: "black",
+          stroke: "black",
+          strokeWidth: 2,
+          dash: [4, 2],
+        });
+        layer.add(arrow);
+        dot.arrow = arrow;
+      });
+
+      // As the dot is dragged, update the arrow’s endpoint.
+      dot.on("dragmove", function () {
+        if (dot.arrow) {
+          dot.arrow.points([
+            nodeGroup.x() + pos.x,
+            nodeGroup.y() + pos.y,
+            dot.getAbsolutePosition().x,
+            dot.getAbsolutePosition().y,
+          ]);
+          layer.batchDraw();
+        }
+      });
+
+      // When dragging ends, remove the arrow.
+      dot.on("dragend", function () {
+        if (dot.arrow) {
+          dot.arrow.destroy();
+          dot.arrow = null;
+          layer.draw();
+        }
+      });
+    });
+
+    // Show arrow dots when the node is clicked.
+    nodeGroup.on("click", function (e) {
+      arrowDots.forEach((dot) => {
+        dot.show();
+      });
+      layer.draw();
+    });
+
+    // Hide arrow dots when clicking on an empty area (the stage background).
+    stage.on("click", function (e) {
+      if (e.target === stage) {
+        arrowDots.forEach((dot) => {
+          dot.hide();
+        });
+        layer.draw();
+      }
+    });
+
+    layer.draw();
+  </script>
+</body>
+
+</html>
